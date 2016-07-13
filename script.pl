@@ -7,6 +7,7 @@
 */
 
 :- use_module(library(debug)).
+:- use_module(library(lodapi/lodapi_gml)).
 :- use_module(library(lodapi/lodapi_query)).
 :- use_module(library(q/q__io)).
 :- use_module(library(q/q_print)).
@@ -18,7 +19,4 @@
 
 run :-
   q_member(P, [geop:hasBorderWith]),
-  call_on_lod(_, P, _, dummy).
-
-dummy(_, S, P, O, Doc) :-
-  q_print_quad(S, P, O, Doc).
+  gml(_, P, _).
