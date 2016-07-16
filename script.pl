@@ -1,4 +1,4 @@
-:- module(script, [run/0]).
+:- module(script, [run/0,number_of_graphs/2]).
 
 /** <module> EKAW 2016 experiment
 
@@ -25,6 +25,7 @@ ineq(c$csize,type = "Gini") #Inequality coeff. of component sizes
 
 :- use_module(library(conv/rdf2gml)).
 :- use_module(library(debug)).
+:- use_module(library(lodapi/lodapi_doc)).
 :- use_module(library(lodapi/lodapi_gml)).
 :- use_module(library(lodapi/lodapi_query)).
 :- use_module(library(os/io)).
@@ -41,37 +42,37 @@ ineq(c$csize,type = "Gini") #Inequality coeff. of component sizes
 :- debug(sparql(_)).
 
 run :-
-  q_member(
-    P,
-    [
-      %foaf:knows,
-      geop:hasBorderWith,
-      gn:parentCountry,
-      gr:includes,
-      lexinfo:partOfSpeech,
-      osspr:contains,
-      osspr:within,
-      skos:broader,
-      skos:broadMatch,
-      skos:closeMatch,
-      skos:exactMatch,
-      skos:hasTopConcept,
-      skos:narrower,
-      skos:narrowMatch,
-      skos:related,
-      skos:relatedMatch,
-      swrc:affiliation
-    ]
-  ),
-  run(P).
-
-run(P) :-
-  SinkOpts = [compression(false)],
+  property(Alias:Local),
+  atomic_list_concat([Alias,Local], '_', Base),
+  SinkOpts = [base_name(Base),compression(false)],
   rdf2gml_start(SinkOpts, NFile, EFile, GFile, ExportOpts),
+  rdf_global_id(Alias:Local, P),
   call_to_streams(NFile, EFile, callback0(P, ExportOpts), SinkOpts),
   rdf2gml_end(NFile, EFile, GFile, SinkOpts).
-  %g <- read_graph(GFile, format="gml").
   
+number_of_graphs(P, NumDocs) :-
+  property(Alias:Local),
+  rdf_global_id(Alias:Local, P),
+  docs(_, P, _, Docs),
+  length(Docs, NumDocs).
 
 callback0(P, ExportOpts, NOut, EOut) :-
   forall(ll_ldf(S, P, O), rdf2gml_triple(NOut, EOut, S, P, O, ExportOpts)).
+
+%property(foaf:knows).
+property(geop:hasBorderWith).
+property(gn:parentCountry).
+property(gr:includes).
+property(lexinfo:partOfSpeech).
+property(osspr:contains).
+property(osspr:within).
+property(skos:broader).
+property(skos:broadMatch).
+property(skos:closeMatch).
+property(skos:exactMatch).
+property(skos:hasTopConcept).
+property(skos:narrower).
+property(skos:narrowMatch).
+property(skos:related).
+property(skos:relatedMatch).
+property(swrc:affiliation).
