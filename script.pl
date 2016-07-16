@@ -68,7 +68,7 @@ run :-
 run(P) :-
   SinkOpts = [compression(false)],
   rdf2gml_start(SinkOpts, NFile, EFile, GFile, ExportOpts),
-  call_to_streams(NFile, EFile, callback0(P, ExportOpts), [compression(false)]),
+  call_to_streams(NFile, EFile, callback0(P, ExportOpts), SinkOpts),
   rdf2gml_end(NFile, EFile, GFile, SinkOpts).
   %g <- read_graph(GFile, format="gml").
   
