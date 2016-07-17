@@ -1,9 +1,14 @@
 library(igraph);
+library(ineq);
 
 sink("result.csv");
 
 cat("#");
 cat("file name");
+cat(",");
+cat("number of edges");
+cat(",");
+cat("number of vertices");
 cat(",");
 cat("average degree");
 cat(",");
@@ -15,9 +20,15 @@ cat("global clustering coefficient");
 cat(",");
 cat("local clustering coefficient");
 cat(",");
-cat("is bipartite?");
-#cat(",");
-#cat("number of components");
+cat("bipartite");
+cat(",");
+cat("power law fit alpha");
+cat(",");
+cat("power law fit p-value");
+cat(",");
+cat("inequality coefficient of degree");
+cat(",");
+cat("inequality coefficient of component sizes");
 cat("\n");
 
 inputFiles <- list.files(pattern = "*.gml");
@@ -25,21 +36,29 @@ for(i in 1:length(inputFiles)) {
   inputFile = inputFiles[i];
   cat(inputFile);
   g <- read.graph(inputFile, format="gml");
+
+  numberOfEdges <- gsize(g);
+  cat(",");
+  cat(numberOfEdges);
+
+  numberOfVertices <- gorder(g);
+  cat(",");
+  cat(numberOfVertices);
   
   degree <- degree(g, mode="total");
-  avgDegree <- mean(degree);
+  averageDegree <- mean(degree);
   cat(",");
-  cat(avgDegree);
+  cat(averageDegree);
   
   inDegree <- degree(g, mode="in");
-  avgInDegree <- mean(inDegree);
+  averageInDegree <- mean(inDegree);
   cat(",");
-  cat(avgInDegree);
+  cat(averageInDegree);
   
   outDegree <- degree(g, mode="out");
-  avgOutDegree <- mean(outDegree);
+  averageOutDegree <- mean(outDegree);
   cat(",");
-  cat(avgOutDegree);
+  cat(averageOutDegree);
   
   globalClusteringCoefficient <- transitivity(g, type="global");
   cat(",");
@@ -53,13 +72,27 @@ for(i in 1:length(inputFiles)) {
   cat(",");
   if (b["res"] == TRUE) {cat("TRUE");} else {cat("FALSE");}
   
+  # The exponent of the fitted power-law distribution.
   fitPowerLaw <- fit_power_law(inDegree + 1, 10);
   cat(",");
+  cat(fitPowerLaw[["alpha"]]);
+  
+  # Small p-values (less than 0.05) indicate that the test rejected
+  # the hypothesis that the original data could have been drawn from
+  # the fitted power-law distribution.
+  cat(",");
   cat(fitPowerLaw[["KS.p"]]);
+
+  # Inequality coefficient of degree.
+  ineqDegree <- ineq(degree, type="Gini");
+  cat(",");
+  cat(ineqDegree);
   
-  #comps <- components(g);
-  #cat(",");
-  #cat(length(comps));
-  
+  # Inequality coefficient of component sizes.
+  components <- components(g, mode ="weak");
+  ineqComponents <- ineq(components$csize, type="Gini");
+  cat(",");
+  cat(ineqComponents);
+
   cat("\n");
 }

@@ -13,14 +13,16 @@
 @version 2016/07
 */
 
+:- use_module(library(apply)).
 :- use_module(library(conv/rdf2gml)).
+:- use_module(library(csv_ext)).
 :- use_module(library(debug)).
+:- use_module(library(list_ext)).
 :- use_module(library(lodapi/lodapi_doc)).
 :- use_module(library(lodapi/lodapi_gml)).
 :- use_module(library(lodapi/lodapi_query)).
 :- use_module(library(os/io)).
 :- use_module(library(pair_ext)).
-:- use_module(library(print_ext)).
 :- use_module(library(q/q__io)).
 :- use_module(library(q/q_print)).
 :- use_module(library(rdf/rdf_prefix), []).
@@ -43,13 +45,14 @@ run(Alias:Local) :-
   SinkOpts = [base_name(Base),compression(false)],
   rdf2gml_start(SinkOpts, NFile, EFile, GFile, ExportOpts),
   rdf_global_id(Alias:Local, P),
-  call_to_streams(NFile, EFile, callback0(P, ExportOpts), SinkOpts),
+  call_to_streams(NFile, EFile, callback1(P, ExportOpts), SinkOpts),
   rdf2gml_end(NFile, EFile, GFile, SinkOpts).
 
 number_of_docs :-
-  findall(NumDocs-[NumDocs,P], number_of_docs(P, NumDocs), Pairs),
-  asc_pairs_values(Pairs, Rows),
-  print_table(Rows).
+  findall(NumDocs-[P,NumDocs], number_of_docs(P, NumDocs), Pairs),
+  asc_pairs_values(Pairs, Lists),
+  maplist(list_row, Lists, Rows),
+  csv_to_file('number_of_docs.csv', Rows).
 
 number_of_docs(P, NumDocs) :-
   property(Alias:Local),
@@ -57,24 +60,24 @@ number_of_docs(P, NumDocs) :-
   docs(_, P, _, Docs),
   length(Docs, NumDocs).
 
-callback0(P, ExportOpts, NOut, EOut) :-
+callback1(P, ExportOpts, NOut, EOut) :-
   forall(ll_ldf(S, P, O), rdf2gml_triple(NOut, EOut, S, P, O, ExportOpts)).
 
-%property(foaf:knows).
-%property(geop:hasBorderWith).
-%property(gn:parentCountry).
-%property(gr:includes).
-%property(lexinfo:partOfSpeech).
-%property(osspr:contains).
-%property(osspr:within).
+property(foaf:knows).
+property(geop:hasBorderWith).
+property(gn:parentCountry).
+property(gr:includes).
+property(lexinfo:partOfSpeech).
+property(osspr:contains).
+property(osspr:within).
 property(skos:broader).
 property(skos:broadMatch).
 property(skos:closeMatch).
 property(skos:exactMatch).
-%property(skos:hasTopConcept).
+property(skos:hasTopConcept).
 property(skos:narrower).
 property(skos:narrowMatch).
 property(skos:related).
-%property(skos:relatedMatch).
-%property(swrc:affiliation).
-%property(tags:associatedTag).
+property(skos:relatedMatch).
+property(swrc:affiliation).
+property(tags:associatedTag).
