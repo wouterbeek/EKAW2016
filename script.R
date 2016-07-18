@@ -22,9 +22,9 @@ cat("local clustering coefficient");
 cat(",");
 cat("bipartite");
 cat(",");
-cat("power law fit alpha");
-cat(",");
 cat("power law fit p-value");
+cat(",");
+cat("power law fit alpha");
 cat(",");
 cat("inequality coefficient of degree");
 cat(",");
@@ -72,17 +72,18 @@ for(i in 1:length(inputFiles)) {
   cat(",");
   if (b["res"] == TRUE) {cat("TRUE");} else {cat("FALSE");}
   
-  # The exponent of the fitted power-law distribution.
-  fitPowerLaw <- fit_power_law(inDegree + 1, 10);
-  cat(",");
-  cat(fitPowerLaw[["alpha"]]);
-  
   # Small p-values (less than 0.05) indicate that the test rejected
   # the hypothesis that the original data could have been drawn from
   # the fitted power-law distribution.
+  fitPowerLaw1 <- fit_power_law(degree + 1, 10);
   cat(",");
-  cat(fitPowerLaw[["KS.p"]]);
+  cat(fitPowerLaw1[["KS.p"]]);
 
+  # The exponent of the fitted power-law distribution.
+  fitPowerLaw2 <- fit_power_law(degree + 1, 10, implementation="R.mle");
+  cat(",");
+  cat(stats4::coef(fitPowerLaw2));
+  
   # Inequality coefficient of degree.
   ineqDegree <- ineq(degree, type="Gini");
   cat(",");
